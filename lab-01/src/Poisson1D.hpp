@@ -70,8 +70,8 @@ public:
     {
       if (p[0] <= 1.0 / 8 || p[0] > 1.0 / 4.0)
         return 0.0;
-      else
-        return -1.0;
+      
+      return -1.0;
     }
   };
 

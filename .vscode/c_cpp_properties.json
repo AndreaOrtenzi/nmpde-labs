@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/u/sw/toolchains/gcc-glibc/11.2.0/pkgs/dealii/9.3.1/include/",
+                "/u/sw/toolchains/gcc-glibc/11.2.0/pkgs/boost/1.76.0/include",
+                "/u/sw/toolchains/gcc-glibc/11.2.0/pkgs/trilinos/13.0.1/include"
+            ],
+            "defines": [],
+            "compilerPath": "/u/sw/toolchains/gcc-glibc/11.2.0/prefix/bin/g++",
+            "cStandard": "gnu17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "linux-gcc-x64",
+            // "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+        }
+    ],
+    "version": 4
+}
