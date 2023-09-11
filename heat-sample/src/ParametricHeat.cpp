@@ -258,7 +258,7 @@ ParametricHeat::assemble_system()
     for (unsigned int i = 0; i < dirichlet_ids.size();++i){
       boundary_functions[dirichlet_ids[i]] = &(dirichlet_functions[i]);
     }
-     
+    
     VectorTools::interpolate_boundary_values(dof_handler,
                                               boundary_functions,
                                               boundary_values);
@@ -295,46 +295,46 @@ ParametricHeat::solve_newton()
   // We apply the boundary conditions to the initial guess (which is stored in
   // solution_owned and solution).
   {
-    IndexSet dirichlet_dofs = DoFTools::extract_boundary_dofs(dof_handler);
-    dirichlet_dofs          = dirichlet_dofs & dof_handler.locally_owned_dofs();
+    // IndexSet dirichlet_dofs = DoFTools::extract_boundary_dofs(dof_handler);
+    // dirichlet_dofs          = dirichlet_dofs & dof_handler.locally_owned_dofs();
 
-    function_g.set_time(time);
+    // function_g.set_time(time);
 
-    TrilinosWrappers::MPI::Vector vector_dirichlet(solution_owned);
-    VectorTools::interpolate(dof_handler, function_g, vector_dirichlet);
+    // TrilinosWrappers::MPI::Vector vector_dirichlet(solution_owned);
+    // VectorTools::interpolate(dof_handler, function_g, vector_dirichlet);
 
-    for (const auto &idx : dirichlet_dofs)
-      solution_owned[idx] = vector_dirichlet[idx];
-
-    solution_owned.compress(VectorOperation::insert);
-    solution = solution_owned;
-
-//     IndexSet boundary_dofs = DoFTools::extract_boundary_dofs(dof_handler);
-//     boundary_dofs          = boundary_dofs & dof_handler.locally_owned_dofs();
-    
-//     bool found = false;
-//     for (unsigned int i = 0; i < dirichlet_ids.size();++i){
-//       // Check if this dof is locally owned:
-//       found = false;
-//       for (const auto &idx : boundary_dofs) {
-//         if (idx == dirichlet_ids[i]){
-//           found = true;
-//           break;
-//         }
-           
-//       }
-//       if (found) {
-//         TrilinosWrappers::MPI::Vector vector_dirichlet(solution_owned);
-//         dirichlet_functions[i].set_time(time);
-//         VectorTools::interpolate(dof_handler, dirichlet_functions[i], vector_dirichlet);
-// // NOT SURE HERE 
-//         solution_owned[i] = vector_dirichlet[i];
-//       }
-    // }
-
+    // for (const auto &idx : dirichlet_dofs)
+    //   solution_owned[idx] = vector_dirichlet[idx];
 
     // solution_owned.compress(VectorOperation::insert);
     // solution = solution_owned;
+
+    IndexSet boundary_dofs = DoFTools::extract_boundary_dofs(dof_handler);
+    boundary_dofs          = boundary_dofs & dof_handler.locally_owned_dofs();
+    
+    bool found = false;
+    for (unsigned int i = 0; i < dirichlet_ids.size();++i){
+      // Check if this dof is locally owned:
+      found = false;
+      for (const auto &idx : boundary_dofs) {
+        if (idx == dirichlet_ids[i]){
+          found = true;
+          break;
+        }
+           
+      }
+      if (found) {
+        TrilinosWrappers::MPI::Vector vector_dirichlet(solution_owned);
+        dirichlet_functions[i].set_time(time);
+        VectorTools::interpolate(dof_handler, dirichlet_functions[i], vector_dirichlet);
+// NOT SURE HERE 
+        solution_owned[i] = vector_dirichlet[i];
+      }
+    }
+
+
+    solution_owned.compress(VectorOperation::insert);
+    solution = solution_owned;
   }
 
   while (n_iter < n_max_iters && residual_norm > residual_tolerance)
