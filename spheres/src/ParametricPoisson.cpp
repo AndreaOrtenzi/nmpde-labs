@@ -319,8 +319,10 @@ ParametricPoisson::solve()
   // We don't use any preconditioner for now, so we pass the identity matrix
   // as preconditioner.
   solver.solve(system_matrix, solution, system_rhs, preconditioner);
+  #if ! GET_TIME
   pcout << "  " << solver_control.last_step() << " iterations"
             << std::endl;
+  #endif
 }
 
 void

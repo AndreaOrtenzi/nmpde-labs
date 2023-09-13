@@ -43,46 +43,16 @@ using namespace dealii;
 // Problem parameters
 // #define N_VALUES {4, 9, 19, 39}
 #define DIM 3
-#define H_VALUES {0.05}// 0.1, 0.05, 0.025, 0.0125}
-#define N_VALUES {4,9} // 4, 9, 19, 39}
-#define EPSILON 4
-#define P_GRADES {1,2}
+#define H_VALUES {0.1, 0.05, 0.025, 0.0125}
+#define N_VALUES {4, 9, 19, 39}
+#define EPSILON {1,2,4,8,16}
+#define P_GRADES {1,2,3}
 #define WRITE_ON_FILE false
 
 // NUM_ITER_TO_TIME
 #define iTT 10
 #define GET_TIME true
 
-
-// mus
-static constexpr auto diffusion_function = [](const dealii::Point<DIM> &p) -> double { 
-    
-    const std::vector<Sphere<DIM>> spheres = {
-        { { 0.10000000000067776, 0.10000000000000485, 0.10000000000002289 }, 0.1 },
-        { { 0.842484606531941, 0.1500000000000169, 0.15000000000000135 }, 0.15 },
-        { { 0.7999832973018323, 0.7999962223715145, 0.41313791257885574 }, 0.2 },
-        { { 0.2500000000002333, 0.3219940474925781, 0.7494309059799914 }, 0.25 }
-    };
-
-    for (unsigned int i=0; i<spheres.size();++i){
-      if (spheres[i].is_in(p))
-        return std::pow(10,EPSILON);
-    }
-    
-    return 1.0;
-};
-
-// sigma (Not used)
-static constexpr auto reaction_function = [](const dealii::Point<DIM> &p) -> double {
-    
-        return 0.0;
-};
-
-// f
-static constexpr auto forcing_function = [](const dealii::Point<DIM> &p) -> double {
-    
-        return 1.0;// (std::exp(p[0])-1)*(std::exp(p[1])-1);
-};
 
 // exact solution:
 #define CHECK_CONVERGENCE false
@@ -198,7 +168,7 @@ public:
   {
   public:
     // Constructor.
-    DiffusionCoefficient()
+    DiffusionCoefficient(const int epsilon_ = 1): epsilon(epsilon_)
     {}
 
     // Evaluation.
@@ -206,8 +176,21 @@ public:
     value(const Point<dim> & p,
           const unsigned int /*component*/ = 0) const override
     {
-      return diffusion_function(p);
+      const std::vector<Sphere<DIM>> spheres = {
+          { { 0.10000000000067776, 0.10000000000000485, 0.10000000000002289 }, 0.1 },
+          { { 0.842484606531941, 0.1500000000000169, 0.15000000000000135 }, 0.15 },
+          { { 0.7999832973018323, 0.7999962223715145, 0.41313791257885574 }, 0.2 },
+          { { 0.2500000000002333, 0.3219940474925781, 0.7494309059799914 }, 0.25 }
+      };
+
+      for (unsigned int i=0; i<spheres.size();++i){
+        if (spheres[i].is_in(p))
+          return std::pow(10,epsilon);
+      }
+      
+      return 1.0;
     }
+    const int epsilon;
 
   };
 
@@ -256,9 +239,10 @@ public:
   #endif
 
   // Constructor.
-  ParametricPoisson(const unsigned int &N_, const unsigned int &r_)
+  ParametricPoisson(const unsigned int &N_, const unsigned int &r_, const int epsilon = 1)
     : N(N_)
     , r(r_) 
+    , diffusion_coefficient(epsilon)
     , mpi_size(Utilities::MPI::n_mpi_processes(MPI_COMM_WORLD))
     , mpi_rank(Utilities::MPI::this_mpi_process(MPI_COMM_WORLD))
     , mesh(MPI_COMM_WORLD)
